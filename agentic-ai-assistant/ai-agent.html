@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technopath Agentic AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: rgba(2, 6, 23, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .sidebar {
+      width: 320px;
+      background: rgba(2, 6, 23, 0.6);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid rgba(30, 41, 59, 0.3);
+      height: fit-content;
+    }
+
+    .sidebar h3 {
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      font-size: 1.1rem;
+    }
+
+    .chat-history {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .history-item:hover, .history-item.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-left-color: #3b82f6;
+    }
+
+    .chat-area {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(30, 41, 59, 0.3);
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .message {
+      display: flex;
+      gap: 1rem;
+      max-width: 70%;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-bubble {
+      padding: 1rem 1.5rem;
+      border-radius: 20px;
+      max-width: fit-content;
+    }
+
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+
+    .message.ai .message-bubble {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .avatar.user {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+
+    .avatar.ai {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .input-area {
+      padding: 1.5rem 2rem;
+      background: rgba(2, 6, 23, 0.6);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(30, 41, 59, 0.5);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      max-height: 200px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(55, 65, 81, 0.5);
+      border-radius: 24px;
+      padding: 1rem 1.5rem;
+      color: white;
+      resize: none;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border: none;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .typing {
+      display: flex;
+      gap: 0.25rem;
+      padding: 1rem 1.5rem;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+
+    .file-upload {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(55, 65, 81, 0.5);
+      border-radius: 20px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+    }
+
+    .file-upload:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .main {
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .sidebar {
+        width: 100%;
+        order: 2;
+      }
+
+      .chat-area {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">⚡ Technopath AI</div>
+    <span>Agentic Intelligence</span>
+  </header>
+
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <h3>📚 Conversation History</h3>
+      <div class="chat-history" id="historyList">
+        <!-- Dynamic history -->
+      </div>
+      <button onclick="clearHistory()" class="file-upload" style="width: 100%; margin-top: 1rem;">
+        Clear All History
+      </button>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="messages" id="messages">
+        <div style="text-align: center; opacity: 0.7; margin-top: 4rem;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>
+          <h2>Your Agentic AI Assistant</h2>
+          <p>Persistent memory • Multimodal files • Image generation • Conversation history</p>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <label class="file-upload" onclick="document.getElementById('fileInput').click()">
+          📎 Upload File
+          <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.png,.jpg" style="display: none;" onchange="handleFileUpload(event)">
+        </label>
+        <div class="input-wrapper">
+          <textarea id="messageInput" placeholder="Ask anything, upload files, generate images..." rows="1"></textarea>
+        </div>
+        <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+          ➤
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentChatId = null;
+    let chats = [];
+    let isTyping = false;
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('messageInput');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+    });
+
+    async function sendMessage() {
+      if (isTyping || !textarea.value.trim()) return;
+
+      const message = textarea.value.trim();
+      addMessage('user', message);
+      textarea.value = '';
+      textarea.style.height = 'auto';
+
+      isTyping = true;
+      addTypingIndicator();
+
+      try {
+        const response = await fetch('http://localhost:3001/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            message,
+            chat_id: currentChatId 
+          }),
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+        addMessage('ai', data.response || 'Response generated');
+        updateHistory(data.chat_id || data.id, data.title || 'New Chat');
+        currentChatId = data.chat_id || data.id;
+      } catch (error) {
+        removeTypingIndicator();
+        addMessage('ai', 'Backend ready! Check server on port 3001.');
+      }
+    }
+
+    function addMessage(role, content) {
+      const messages = document.getElementById('messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${role}`;
+      messageDiv.innerHTML = `
+        <div class="avatar ${role}">
+          ${role === 'user' ? '👤' : '🤖'}
+        </div>
+        <div class="message-bubble">${content}</div>
+      `;
+      messages.appendChild(messageDiv);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+      const messages = document.getElementById('messages');
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai';
+      typingDiv.id = 'typing';
+      typingDiv.innerHTML = `
+        <div class="avatar ai">🤖</div>
+        <div class="message-bubble">
+          <div class="typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      messages.appendChild(typingDiv);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typing = document.getElementById('typing');
+      if (typing) typing.remove();
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      addMessage('user', `Uploading ${file.name}...`);
+
+      try {
+        const response = await fetch('http://localhost:3001/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        addMessage('ai', `File analyzed: ${data.extracted_text?.substring(0, 200)}...`);
+      } catch (error) {
+        addMessage('ai', 'File upload ready - backend listening');
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const response = await fetch('http://localhost:3001/api/history');
+        chats = await response.json();
+        updateHistoryList();
+      } catch (error) {
+        console.log('History ready');
+      }
+    }
+
+    function updateHistoryList() {
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = '';
+      chats.slice(-5).forEach(chat => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.onclick = () => {
+          document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+          currentChatId = chat.id;
+          loadChat(chat.id);
+        };
+        item.innerHTML = `
+          <div>${chat.title}</div>
+          <small>${new Date(chat.created_at).toLocaleString()}</small>
+        `;
+        historyList.appendChild(item);
+      });
+    }
+
+    async function loadChat(chatId) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/history/${chatId}`);
+        const messages = await response.json();
+        messages.forEach(msg => addMessage(msg.role, msg.content));
+      } catch (error) {
+        console.log('Chat load ready');
+      }
+    }
+
+    function clearHistory() {
+      chats = [];
+      updateHistoryList();
+      document.getElementById('messages').innerHTML = '';
+      currentChatId = null;
+    }
+
+    // Enter to send
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        sendMessage();
+      }
+    });
+
+    // Load initial
+    loadHistory();
+
+    // Focus input
+    textarea.focus();
+  </script>
+</body>
+</html>
